@@ -1,0 +1,14 @@
+bibentry(bibtype = "article",
+         key = "henelius:2016:astrid",
+         title = "Finding Statistically Significant Attribute Interactions",
+         author = c(person("Andreas", "Henelius"),
+                    person("Antti", "Ukkonen"),
+                    person("Kai", "Puolamäki")),
+         year = 2016,
+	 journal = "arXiv e-prints",
+url = "",
+eprinttype = "arXiv",
+eprintclass = "stat.ML",
+eprint = ""
+         )
+	 

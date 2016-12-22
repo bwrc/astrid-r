@@ -1,0 +1,17 @@
+Package: astrid
+Title: Automatic STructure IDentification
+Version: 0.1.0
+Description: Find Statistically Significant Attribute Interactions in Datasets Using Classifiers.
+Authors@R: c(person("Andreas", "Henelius", role = c("aut", "cre"), email = "andreas.henelius@ttl.fi"),
+	   person("Finnish Institute of Occupational Health", role = c("cph")))
+Depends:
+    R (>= 3.2.3),
+    parallel,
+Suggests:
+    e1071,
+    randomForest,
+    foreign,
+    xtable
+License: MIT + file LICENSE
+URL: https://github.com/bwrc/astrid-r
+RoxygenNote: 5.0.1

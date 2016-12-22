@@ -1,0 +1,3 @@
+Download the data from
+http://prdownloads.sourceforge.net/weka/datasets-UCI.jar
+and extract the contents (.arff-files) here.
