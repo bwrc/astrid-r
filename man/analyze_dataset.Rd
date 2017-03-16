@@ -4,15 +4,17 @@
 \alias{analyze_dataset}
 \title{Analyze the given dataset.}
 \usage{
-analyze_dataset(dataset, classname = "class", seed = 42,
-  classifier = NULL, alpha = 0.05, R = (1 + ceiling(1/alpha)),
-  Rmin = 250, Rmax = 500, z = 2.6, prune_singletons = TRUE,
-  parallel = TRUE)
+analyze_dataset(dataset, classname = "class", seed_traintest = 42,
+  seed = 42, classifier = NULL, alpha = 0.05, R = (1 +
+  ceiling(1/alpha)), Rmin = 250, Rmax = 500, z = 2.57,
+  prune_singletons = TRUE, parallel = TRUE, early_stopping = FALSE)
 }
 \arguments{
 \item{dataset}{The dataset to analyze}
 
 \item{classname}{The name of the class attribute in the dataset. Default is \code{class}.}
+
+\item{seed_traintest}{Random seed used for splitting the data into training and testing sets, default is 42.}
 
 \item{seed}{Random seed, default is 42.}
 
@@ -26,11 +28,13 @@ analyze_dataset(dataset, classname = "class", seed = 42,
 
 \item{Rmax}{Maximum number of replications to use for calculating p-values. Default is 500.}
 
-\item{z}{Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 
 \item{prune_singletons}{Should singletons be pruned. Default is \code{TRUE}.}
 
 \item{parallel}{Calculate p-values in parallel (Boolean, default is \code{TRUE}). If parallel is used the results are not deterministic using the same random seed.}
+
+\item{early_stopping}{Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.}
 }
 \value{
 A results strucure (list with fields).

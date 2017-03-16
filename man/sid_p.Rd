@@ -5,7 +5,8 @@
 \title{Calculate the p-values for a list of trees.}
 \usage{
 sid_p(data_train, data_test, tree_list, g0 = NULL, classifier = svm,
-  Rmin = 250, Rmax = 500, alpha = 0.05, z = 2.6, parallel = TRUE)
+  Rmin = 250, Rmax = 500, alpha = 0.05, z = 2.57, parallel = TRUE,
+  early_stopping = FALSE)
 }
 \arguments{
 \item{data_train}{Training data.}
@@ -24,9 +25,12 @@ sid_p(data_train, data_test, tree_list, g0 = NULL, classifier = svm,
 
 \item{alpha}{The confidence level at which we are evaluating statistical significance of the tree.}
 
-\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 
 \item{parallel}{Calculate in parallel (Boolean, default is \code{TRUE}).}
+
+\item{early_stopping}{Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.
+'}
 }
 \value{
 The treelist with the p-values added.

@@ -86,11 +86,12 @@ sid_randomize_dataset <- function(tree, dataset) {
 #' @param classifier A classifier function, default is svm (from the e1071 package).
 #' @param R Number of replications. Default is 10.
 #' @param parallel Calculate in parallel (Boolean, default is \code{TRUE}).
+#' @param stats Return statistics for the tree. Default is \code{FALSE}.
 #'
 #' @return The average goodness.
 #'
 #' @export
-sid_tree_goodness <- function(data_train, data_test, tree, classifier, R = 10, parallel = TRUE) {
+sid_tree_goodness <- function(data_train, data_test, tree, classifier, R = 10, parallel = TRUE, stats = FALSE) {
     ## ----------
     ## make a call to rnorm to consume some randomness
     rnorm(1)
@@ -107,7 +108,12 @@ sid_tree_goodness <- function(data_train, data_test, tree, classifier, R = 10, p
                          sid_get_goodness(classifier = classifier, data_train = sid_gen_surrogate(tree, data_train), data_test = data_test)
                          )
     }
-    mean(out)
+
+    if (stats) {
+        list("mean" = mean(out), "range" = c(min(out), max(out)), "sd" = sd(out), "median" = median(out), "raw" = out)
+    } else {
+        mean(out)
+    }
 }
 
 
@@ -342,8 +348,6 @@ sid_p_tree <- function(data_train, data_test, tree, g0 = NULL, classifier = svm,
         g0 <- sid_get_goodness(data_train, data_test, classifier = classifier)
 
     if (parallel) {
-
-
         d <- simplify2array(mclapply(seq.int(R), function(i) sid_tree_goodness(data_train, data_test, tree, classifier = classifier, R = 1, parallel = FALSE), mc.cores = (detectCores() - 1)))
     }
     else {
@@ -372,13 +376,13 @@ sid_p_tree <- function(data_train, data_test, tree, g0 = NULL, classifier = svm,
 #'
 #' @param p Proportion of successes
 #' @param n Number of samples
-#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #'
 #' @return Confidence interval for the p-value
 #'
 #' @export
-sid_p_ci <- function(p, n, z = 1.96) {
-    a <- sqrt(0.5*(1/n)*p*(1-p))
+sid_p_ci <- function(p, n, z = 2.57) {
+    a <- z * sqrt((1/n)*p*(1-p))
     p + c(-a, a)
 }
 
@@ -396,13 +400,13 @@ sid_p_ci <- function(p, n, z = 1.96) {
 #' @param Rmax Maximum number of replications. Default is 500.
 #' @param return_raw Return raw data used in the p-value calculation (Boolean, default is \code{FALSE}.
 #' @param alpha The confidence level at which we are evaluating statistical significance of the tree.
-#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param parallel Calculate in parallel (Boolean, default is \code{TRUE}).
 #'
 #' @return The p-value for the tree
 #'
 #' @export
-sid_p_tree_es <- function(data_train, data_test, tree, g0 = NULL, classifier = svm, Rmin = 250, Rmax = 500, parallel = TRUE, return_raw = FALSE, alpha = 0.05, z = 2.6) {
+sid_p_tree_es <- function(data_train, data_test, tree, g0 = NULL, classifier = svm, Rmin = 250, Rmax = 500, parallel = TRUE, return_raw = FALSE, alpha = 0.05, z = 2.57) {
     ## ----------
     ## make a call to rnorm to consume some randomness
     rnorm(1)
@@ -472,19 +476,42 @@ sid_p_tree_es <- function(data_train, data_test, tree, g0 = NULL, classifier = s
 #' @param Rmin Ninimum number of replications. Default is 250.
 #' @param Rmax Maximum number of replications. Default is 500.
 #' @param alpha The confidence level at which we are evaluating statistical significance of the tree.
-#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param parallel Calculate in parallel (Boolean, default is \code{TRUE}).
-#'
+#' @param early_stopping Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.
+#' '
 #' @return The treelist with the p-values added.
 #'
 #' @export
-sid_p <- function(data_train, data_test, tree_list, g0 = NULL, classifier = svm, Rmin = 250, Rmax = 500, alpha = 0.05, z = 2.6, parallel = TRUE) {
+sid_p <- function(data_train, data_test, tree_list, g0 = NULL, classifier = svm, Rmin = 250, Rmax = 500, alpha = 0.05, z = 2.57, parallel = TRUE, early_stopping = FALSE) {
     if (is.null(g0))
         g0 <- sid_get_goodness(data_train, data_test, classifier = classifier)
 
     for (i in seq.int(length(tree_list))) {
-        ## -- without early stopping -- tree_list[[i]][["p"]] <- sid_p_tree(data_train, data_test, tree = tree_list[[i]][["tree"]], g0 = g0, classifier = classifier, R = R, parallel = parallel)
-        tree_list[[i]][["p"]] <- sid_p_tree_es(data_train, data_test, tree = tree_list[[i]][["tree"]], g0 = g0, classifier = classifier, Rmin = Rmin, Rmax = Rmax, z = z, alpha = alpha, parallel = parallel)
+        if (early_stopping) {
+            ## -- with early stopping --
+            ## tree_list[[i]][["p"]]
+            tmp <- sid_p_tree_es(data_train, data_test, tree = tree_list[[i]][["tree"]], g0 = g0, classifier = classifier, Rmin = Rmin, Rmax = Rmax, z = z, alpha = alpha, parallel = parallel, return_raw = TRUE)
+        } else {
+            ## -- without early stopping --
+            ## tree_list[[i]][["p"]]
+            tmp <- sid_p_tree(data_train, data_test, tree = tree_list[[i]][["tree"]], g0 = g0, classifier = classifier, R = Rmin, parallel = parallel, return_raw = TRUE)
+        }
+
+        ## store the p-value
+        tree_list[[i]][["p"]] <- tmp$p
+
+        acc_stats        <- list()
+        acc_stats$mean   <- mean(tmp$d)
+        acc_stats$median <- median(tmp$d)
+        acc_stats$range  <- c(min(tmp$d), max(tmp$d))
+        acc_stats$g0     <- g0
+        acc_stats$sd     <- sd(tmp$d)
+        acc_stats$raw    <- tmp$d
+        acc_stats$p      <- tmp$p
+
+        ## Add statistics on the tree
+        tree_list[[i]][["acc_stats"]] <- acc_stats
     }
 
     tree_list
@@ -529,13 +556,13 @@ sid_filter_trees <- function(tree_list, alpha = 0.05, max_k = TRUE) {
 #' @param alpha Significance level (default is 0.05).
 #' @param Rmin Ninimum number of replications for calculating p-values. Default is 250.
 #' @param Rmax Maximum number of replications for calculating p-values. Default is 500.
-#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param parallel Calculate in parallel (Boolean, default is \code{TRUE}).
 #'
 #' @return Pruned treelist
 #'
 #' @export
-sid_prune_treelist <- function(treelist, data_train, data_test, classifier = svm, R = R, Rmin = 250, Rmax = 500, z = 2.6, alpha = 0.05, parallel = TRUE) {
+sid_prune_treelist <- function(treelist, data_train, data_test, classifier = svm, R = R, Rmin = 250, Rmax = 500, z = 2.57, alpha = 0.05, parallel = TRUE) {
     tmp <- lapply(treelist,
                   function(i) sid_prune_singletons(i, data_train, data_test, R = Rmin, classifier = classifier, alpha = alpha, parallel = parallel)
                   )
@@ -601,14 +628,14 @@ sid_prune_tree <- function(tree_res, data_train, data_test, classifier = svm, R 
 #' @param R Number of replications. Default is 100.
 #' @param Rmin Ninimum number of replications for calculating p-values. Default is 250.
 #' @param Rmax Maximum number of replications for calculating p-values. Default is 500.
-#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param alpha Significance level (default is 0.05).
 #' @param parallel Calculate in parallel (Boolean, default is \code{TRUE}).
 #'
 #' @return The pruned tree results structure.
 #'
 #' @export
-sid_prune_singletons <- function(tree_res, data_train, data_test, classifier = svm, R = 100, Rmin = 250, Rmax = 500, z = 2.6, alpha = 0.05, parallel = TRUE) {
+sid_prune_singletons <- function(tree_res, data_train, data_test, classifier = svm, R = 100, Rmin = 250, Rmax = 500, z = 2.57, alpha = 0.05, parallel = TRUE) {
     id_cl <- which(names(data) == "class")
     tree0 <- sid_treeify(tree_res[["tree"]], data_train)
 

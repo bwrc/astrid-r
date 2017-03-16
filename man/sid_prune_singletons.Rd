@@ -5,7 +5,7 @@
 \title{Prune singletons from tree.}
 \usage{
 sid_prune_singletons(tree_res, data_train, data_test, classifier = svm,
-  R = 100, Rmin = 250, Rmax = 500, z = 2.6, alpha = 0.05,
+  R = 100, Rmin = 250, Rmax = 500, z = 2.57, alpha = 0.05,
   parallel = TRUE)
 }
 \arguments{
@@ -23,7 +23,7 @@ sid_prune_singletons(tree_res, data_train, data_test, classifier = svm,
 
 \item{Rmax}{Maximum number of replications for calculating p-values. Default is 500.}
 
-\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 
 \item{alpha}{Significance level (default is 0.05).}
 

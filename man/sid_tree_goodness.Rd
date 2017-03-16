@@ -5,7 +5,7 @@
 \title{Get the goodness (accuracy) of a tree.}
 \usage{
 sid_tree_goodness(data_train, data_test, tree, classifier, R = 10,
-  parallel = TRUE)
+  parallel = TRUE, stats = FALSE)
 }
 \arguments{
 \item{data_train}{Training data.}
@@ -17,6 +17,8 @@ sid_tree_goodness(data_train, data_test, tree, classifier, R = 10,
 \item{R}{Number of replications. Default is 10.}
 
 \item{parallel}{Calculate in parallel (Boolean, default is \code{TRUE}).}
+
+\item{stats}{Return statistics for the tree. Default is \code{FALSE}.}
 }
 \value{
 The average goodness.

@@ -5,7 +5,7 @@
 \title{Prune all trees in the treelist.}
 \usage{
 sid_prune_treelist(treelist, data_train, data_test, classifier = svm, R = R,
-  Rmin = 250, Rmax = 500, z = 2.6, alpha = 0.05, parallel = TRUE)
+  Rmin = 250, Rmax = 500, z = 2.57, alpha = 0.05, parallel = TRUE)
 }
 \arguments{
 \item{treelist}{List of trees.}
@@ -22,7 +22,7 @@ sid_prune_treelist(treelist, data_train, data_test, classifier = svm, R = R,
 
 \item{Rmax}{Maximum number of replications for calculating p-values. Default is 500.}
 
-\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 
 \item{alpha}{Significance level (default is 0.05).}
 

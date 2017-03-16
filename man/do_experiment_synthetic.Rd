@@ -8,7 +8,8 @@ Perform experiments on synthetic datasets.}
 \usage{
 do_experiment_synthetic(classifier_list, datapath, savepath, R = NULL,
   Rmin = NULL, Rmax = NULL, z = NULL, alpha = NULL,
-  prune_singletons = FALSE)
+  prune_singletons = FALSE, seed = 42, seed_traintest = 42,
+  early_stopping = FALSE)
 }
 \arguments{
 \item{classifier_list}{List of classifiers}
@@ -25,11 +26,17 @@ case R = 1 + (1 / alpha) will be used by
 
 \item{Rmax}{Maximum number of replications to use for calculating p-values.}
 
-\item{z}{Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 
 \item{alpha}{Significance level (default is 0.05).}
 
 \item{prune_singletons}{Should singletons be pruned. Default is \code{TRUE}.}
+
+\item{seed}{Random seed, default is 42.}
+
+\item{seed_traintest}{Random seed used for splitting the data into training and testing sets, default is 42.}
+
+\item{early_stopping}{Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.}
 }
 \value{
 Nothing.

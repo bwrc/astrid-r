@@ -149,19 +149,21 @@ list_datasets_sorted <- function(datapath) {
 #' @param dataset The dataset to analyze
 #' @param classname The name of the class attribute in the dataset. Default is \code{class}.
 #' @param seed Random seed, default is 42.
+#' @param seed_traintest Random seed used for splitting the data into training and testing sets, default is 42.
 #' @param classifier The classifier to be used, as a string. Default is \code{NULL}.
 #' @param alpha Significance level (default is 0.05).
 #' @param R Number of samples to use for calculating the accuracy. Default is R = 1 + (1 / alpha).
 #' @param Rmin Ninimum number of replications to use for calculating p-values. Default is 250.
 #' @param Rmax Maximum number of replications to use for calculating p-values. Default is 500.
-#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param prune_singletons Should singletons be pruned. Default is \code{TRUE}.
 #' @param parallel Calculate p-values in parallel (Boolean, default is \code{TRUE}). If parallel is used the results are not deterministic using the same random seed.
+#' @param early_stopping Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.
 #'
 #' @return A results strucure (list with fields).
 #'
 #' @export
-analyze_dataset <- function(dataset, classname = "class", seed = 42, classifier = NULL, alpha = 0.05, R = (1 + ceiling(1 / alpha)), Rmin = 250, Rmax = 500, z = 2.6, prune_singletons = TRUE, parallel = TRUE) {
+analyze_dataset <- function(dataset, classname = "class", seed_traintest = 42, seed = 42, classifier = NULL, alpha = 0.05, R = (1 + ceiling(1 / alpha)), Rmin = 250, Rmax = 500, z = 2.57, prune_singletons = TRUE, parallel = TRUE, early_stopping = FALSE) {
     if (is.null(classifier))
         stop("No classifier specified!")
 
@@ -173,16 +175,24 @@ analyze_dataset <- function(dataset, classname = "class", seed = 42, classifier 
     if (parallel) {
         RNGkind("L'Ecuyer-CMRG")
     }
-
-    set.seed(seed)
     
+   
     ## Set dataset properties
     dataset <- get_dataset_properties(dataset)
+
+    ## Set the random seed for splitting into training and testing
+    cat("Using a train-test random seed of: ", seed_traintest, "\n")
+    set.seed(seed_traintest)
 
     ## Split the dataset into training, testing and validation
     ## dataset <- split_dataset(dataset, classname = classname)
     dataset <- split_dataset_ttv(dataset, classname = classname)
 
+    ## Set random seed for the rest of the algorithm
+    cat("Using a random seed of: ", seed, "\n")
+    set.seed(seed)
+
+    
     ## Start timer
     timelist <- list()
     t_start <- Sys.time()
@@ -209,7 +219,7 @@ analyze_dataset <- function(dataset, classname = "class", seed = 42, classifier 
     t_tmp             <- Sys.time()
     ## res_tree_p        <- sid_p(dataset$data_train, dataset$data_test, res_tree[["trees"]], R = R, classifier = classifier)
 
-    res_tree_p        <- sid_p(dataset$data_train, dataset$data_validation, res_tree[["trees"]], classifier = classifier, Rmin = Rmin, Rmax = Rmax, z = z, alpha = alpha, parallel = parallel)
+    res_tree_p        <- sid_p(dataset$data_train, dataset$data_validation, res_tree[["trees"]], classifier = classifier, Rmin = Rmin, Rmax = Rmax, z = z, alpha = alpha, parallel = parallel, early_stopping = early_stopping)
     timelist[["t_p"]] <- as.numeric(difftime(Sys.time(), t_tmp, units = "secs"))
     cat("\t[DONE]\n\n")
 
@@ -313,12 +323,16 @@ load_result <- function(datapath, dataset, classifier) {
 #' @param Rmin Ninimum number of replications to use for calculating p-values.
 #' @param Rmax Maximum number of replications to use for calculating p-values.
 #' @param alpha Significance level (default is 0.05).
-#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param prune_singletons Should singletons be pruned. Default is \code{TRUE}.
+#' @param seed_traintest Random seed used for splitting the data into training and testing sets, default is 42.
+#' @param seed Random seed, default is 42.
+#' @param early_stopping Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.
+#' 
 #' @return Nothing.
 #'
 #' @export
-do_experiment_uci <- function(dataset_list, classifier_list, datapath, savepath, R = NULL, Rmin = NULL, Rmax = NULL, z = NULL, alpha = NULL, prune_singletons = FALSE) {
+do_experiment_uci <- function(dataset_list, classifier_list, datapath, savepath, R = NULL, Rmin = NULL, Rmax = NULL, z = NULL, alpha = NULL, prune_singletons = FALSE, seed = 42, seed_traintest = 42, early_stopping = FALSE                ) {
     for (ds in dataset_list) {
         dataset <- read_uci_dataset(datapath, dataset = ds)
 
@@ -327,9 +341,9 @@ do_experiment_uci <- function(dataset_list, classifier_list, datapath, savepath,
             cat(msg)
 
             if (is.null(R)) {
-                res <- analyze_dataset(dataset, classname = "class", classifier = cl, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons)
+                res <- analyze_dataset(dataset, classname = "class", classifier = cl, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons, seed = seed, seed_traintest = seed_traintest, early_stopping = early_stopping)
             } else {
-                res <- analyze_dataset(dataset, classname = "class", classifier = cl, R = R,  Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons)
+                res <- analyze_dataset(dataset, classname = "class", classifier = cl, R = R,  Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons, seed = seed, seed_traintest = seed_traintest, early_stopping = early_stopping)
             }
 
             save_result(res, savepath)
@@ -351,21 +365,24 @@ do_experiment_uci <- function(dataset_list, classifier_list, datapath, savepath,
 #' @param Rmin Ninimum number of replications to use for calculating p-values.
 #' @param Rmax Maximum number of replications to use for calculating p-values.
 #' @param alpha Significance level (default is 0.05).
-#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.
+#' @param z Parameter for confidence band for p-values. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.
 #' @param prune_singletons Should singletons be pruned. Default is \code{TRUE}.
+#' @param seed_traintest Random seed used for splitting the data into training and testing sets, default is 42.
+#' @param seed Random seed, default is 42.
+#' @param early_stopping Use early stopping. Default is \code{FALSE} in which case Rmin samples are used to calculate p-values. If \code{TRUE} at least Rmin and at most Rmax values are used.
 #'
 #' @return Nothing.
 #'
 #' @export
-do_experiment_synthetic <- function(classifier_list, datapath, savepath, R = NULL, Rmin = NULL, Rmax = NULL, z = NULL, alpha = NULL, prune_singletons = FALSE) {
+do_experiment_synthetic <- function(classifier_list, datapath, savepath, R = NULL, Rmin = NULL, Rmax = NULL, z = NULL, alpha = NULL, prune_singletons = FALSE, seed = 42, seed_traintest = 42, early_stopping = FALSE) {
     dataset <- make_synthetic_dataset(N = 500, seed = 42, mg2 = 0.6)
 
     for (cl in classifier_list) {
         cat(cl, "\n")
         if (is.null(R)) {
-            res <- analyze_dataset(dataset, classname = "class", classifier = cl, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons)
+            res <- analyze_dataset(dataset, classname = "class", classifier = cl, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons, seed = seed, seed_traintest = seed_traintest, early_stopping = early_stopping)
         } else {
-            res <- analyze_dataset(dataset, classname = "class", classifier = cl, R = R, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons)
+            res <- analyze_dataset(dataset, classname = "class", classifier = cl, R = R, Rmin = Rmin, Rmax = Rmax, alpha = alpha, z = z, prune_singletons = prune_singletons, seed = seed, seed_traintest = seed_traintest, early_stopping = early_stopping)
         }
 
         save_result(res, savepath)

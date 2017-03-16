@@ -6,7 +6,7 @@
 \usage{
 sid_p_tree_es(data_train, data_test, tree, g0 = NULL, classifier = svm,
   Rmin = 250, Rmax = 500, parallel = TRUE, return_raw = FALSE,
-  alpha = 0.05, z = 2.6)
+  alpha = 0.05, z = 2.57)
 }
 \arguments{
 \item{data_train}{Training data.}
@@ -29,7 +29,7 @@ sid_p_tree_es(data_train, data_test, tree, g0 = NULL, classifier = svm,
 
 \item{alpha}{The confidence level at which we are evaluating statistical significance of the tree.}
 
-\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 }
 \value{
 The p-value for the tree

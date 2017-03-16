@@ -49,18 +49,17 @@ library(randomForest)
 dataset <- make_synthetic_dataset(N = 500, seed = 42, mg2 = 0.6)
 
 ## Perform the analysis using the ASTRID algorithm
-res <- analyze_dataset(dataset, classname = "class",  classifier = "svm", parallel = TRUE, R = 100)
+res <- analyze_dataset(dataset, classname = "class",  classifier = "svm", parallel = TRUE, R = 250)
 
 ## Print the results as an HTML table
 print_result_table_html(res, full_tree = TRUE)
 ```
 This gives the following results for the analysis of the synthetic dataset using the SVM classifier:
-
 <table border=1>
 <tr> <th> k </th> <th> acc </th> <th> p </th> <th> a3 </th> <th> a4 </th> <th> a2 </th> <th> a1 </th>  </tr>
-  <tr> <td> 2 </td> <td> 0.89 </td> <td> 0.74 </td> <td> (A) </td> <td> (B </td> <td> B </td> <td> B) </td> </tr>
-  <tr> <td> 3 </td> <td> 0.88 </td> <td> 0.77 </td> <td> (A) </td> <td> (B) </td> <td> (C </td> <td> C) </td> </tr>
-  <tr> <td> 4 </td> <td> 0.74 </td> <td> 0.00 </td> <td> (A) </td> <td> (B) </td> <td> (C) </td> <td> (D) </td> </tr>
+  <tr> <td> 2 </td> <td> 0.89 </td> <td> 0.71 </td> <td> (A) </td> <td> (B </td> <td> B </td> <td> B) </td> </tr>
+  <tr> <td> 3 </td> <td> 0.88 </td> <td> 0.78 </td> <td> (A) </td> <td> (B) </td> <td> (C </td> <td> C) </td> </tr>
+  <tr> <td> 4 </td> <td> 0.73 </td> <td> 0.00 </td> <td> (A) </td> <td> (B) </td> <td> (C) </td> <td> (D) </td> </tr>
    </table>
 
 In this table _k_ is the size (cardinality) of the grouping, _acc_ is the average accuracy of the classifier when trained using a dataset randomised using this grouping, and _p_ is the statistical significance of the grouping. The following columns each denote one attribute (here _a4_, _a3_, _a1_ and _a2_.). At each row, attributes marked with the same letter belong to the same group.

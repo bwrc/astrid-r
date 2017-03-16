@@ -4,14 +4,14 @@
 \alias{sid_p_ci}
 \title{Binomial confidence interval for the p-value}
 \usage{
-sid_p_ci(p, n, z = 1.96)
+sid_p_ci(p, n, z = 2.57)
 }
 \arguments{
 \item{p}{Proportion of successes}
 
 \item{n}{Number of samples}
 
-\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.6 for 99 percent. Default is 2.6.}
+\item{z}{Parameter for confidence band. Use 1.96 for 95 percent, 2.25 for 97.5 percent and 2.57 for 99 percent. Default is 2.57.}
 }
 \value{
 Confidence interval for the p-value

@@ -9,7 +9,7 @@ library(randomForest)
 dataset <- make_synthetic_dataset(N = 500, seed = 42, mg2 = 0.6)
 
 ## Perform the analysis using the ASTRID algorithm
-res <- analyze_dataset(dataset, classname = "class",  classifier = "svm", parallel = TRUE, R = 100)
+res <- analyze_dataset(dataset, classname = "class",  classifier = "svm", parallel = TRUE, R = 250, early_stopping = FALSE)
 
 ## Print the results as an HTML table
 print_result_table_html(res, full_tree = TRUE)
