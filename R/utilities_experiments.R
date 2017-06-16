@@ -388,3 +388,14 @@ do_experiment_synthetic <- function(classifier_list, datapath, savepath, R = NUL
         save_result(res, savepath)
     }
 }
+
+
+#' Compute the confidence intervals (CI) for the accuracy using the quantile method.
+#'
+#' @param avec A vector with accuracy values.
+#'
+#' @return The results with the CIs added.
+#' @export
+compute_ci <- function(avec, alpha = 5) {
+    quantile(avec, probs = c(alpha/100, (100-alpha)/100), type = 1)
+}

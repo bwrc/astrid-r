@@ -509,7 +509,8 @@ sid_p <- function(data_train, data_test, tree_list, g0 = NULL, classifier = svm,
         acc_stats$sd     <- sd(tmp$d)
         acc_stats$raw    <- tmp$d
         acc_stats$p      <- tmp$p
-
+        acc_stats$ci     <- compute_ci(acc_stats$raw, alpha = 100 * alpha)
+        
         ## Add statistics on the tree
         tree_list[[i]][["acc_stats"]] <- acc_stats
     }

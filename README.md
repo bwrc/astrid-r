@@ -3,7 +3,7 @@ ASTRID
 
 The `astrid` R-package, short for Automatic STRucture IDentification, provides an implementation of the method described in
 
-_Henelius, Andreas, Ukkonen, Antti, and Puolamäki, Kai. Finding Statistically Significant Attribute Interactions. 2016_
+_Henelius, Andreas, Puolamäki, Kai and Ukkonen, Antti. Finding Statistically Significant Attribute Interactions. 2016_, [available from arXiv](https://arxiv.org/abs/1612.07597).
 
 The basic idea is to use classifiers to investigate class-dependent attribute interactions in datasets.
 

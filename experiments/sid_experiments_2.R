@@ -55,9 +55,6 @@ calculate_stats <- function(respath, savepath, classifier) {
         res$extra <- out
 
         save_result(res, savepath)
-        ## cat(dsname, "\n")
-        ## e(str(out))
-
     }
 }
 
